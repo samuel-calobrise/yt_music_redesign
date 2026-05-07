@@ -57,3 +57,52 @@ function draw() {
 }
 
 draw();
+
+function updateDuskProgress() {
+  const player = document.querySelector("ytmusic-player-bar");
+  const progress = document.querySelector(
+    "ytmusic-player-bar tp-yt-paper-slider#progress-bar"
+  );
+
+  if (!player || !progress) return;
+
+  const value = Number(progress.getAttribute("aria-valuenow") || 0);
+  const max = Number(progress.getAttribute("aria-valuemax") || 0);
+
+  if (!max) return;
+
+  const percent = value / max;
+  player.style.setProperty("--dusk-progress", percent);
+
+  let knob = player.querySelector(".dusk-progress-knob");
+
+  if (!knob) {
+    knob = document.createElement("div");
+    knob.className = "dusk-progress-knob";
+    player.appendChild(knob);
+  }
+}
+
+setInterval(updateDuskProgress, 500);
+updateDuskProgress();
+
+setInterval(updateDuskProgress, 500);
+updateDuskProgress();
+
+function updateDuskKnob() {
+  const player = document.querySelector("ytmusic-player-bar");
+  if (!player) return;
+
+  let knob = player.querySelector(".dusk-knob");
+  if (!knob) {
+    knob = document.createElement("div");
+    knob.className = "dusk-knob";
+    player.appendChild(knob);
+  }
+
+  const progress = Number(getComputedStyle(player).getPropertyValue("--dusk-progress")) || 0;
+
+  knob.style.left = `calc(28px + (100% - 56px) * ${progress})`;
+}
+
+setInterval(updateDuskKnob, 500);
