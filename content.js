@@ -1,4 +1,4 @@
-console.log("YT Music Dusk loaded");
+console.log("YT Music Dusk loaded.");
 
 /* =========================
    1. CANVAS BACKGROUND
