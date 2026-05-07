@@ -98,4 +98,4 @@ Este projeto no estado atual ainda é apenas para fins educacionais e experiment
 
 ##  Autor
 
-Desenvolvido por samuel calobrise
+Desenvolvido por samuel calobrise com carinho
