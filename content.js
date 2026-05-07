@@ -1,5 +1,9 @@
 console.log("YT Music Dusk loaded");
 
+/* =========================
+   1. CANVAS BACKGROUND
+========================= */
+
 const canvas = document.createElement("canvas");
 canvas.id = "dusk-canvas";
 document.body.appendChild(canvas);
@@ -11,8 +15,8 @@ function resizeCanvas() {
   canvas.height = window.innerHeight;
 }
 
-resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
 
 let time = 0;
 
@@ -58,51 +62,212 @@ function draw() {
 
 draw();
 
-function updateDuskProgress() {
-  const player = document.querySelector("ytmusic-player-bar");
-  const progress = document.querySelector(
+/* =========================
+   2. PLAYER CACHE
+========================= */
+
+let player = null;
+let progressEl = null;
+
+function cachePlayer() {
+  player = document.querySelector("ytmusic-player-bar");
+  progressEl = document.querySelector(
     "ytmusic-player-bar tp-yt-paper-slider#progress-bar"
   );
-
-  if (!player || !progress) return;
-
-  const value = Number(progress.getAttribute("aria-valuenow") || 0);
-  const max = Number(progress.getAttribute("aria-valuemax") || 0);
-
-  if (!max) return;
-
-  const percent = value / max;
-  player.style.setProperty("--dusk-progress", percent);
-
-  let knob = player.querySelector(".dusk-progress-knob");
-
-  if (!knob) {
-    knob = document.createElement("div");
-    knob.className = "dusk-progress-knob";
-    player.appendChild(knob);
-  }
 }
 
-setInterval(updateDuskProgress, 500);
-updateDuskProgress();
+setInterval(cachePlayer, 500);
+cachePlayer();
 
-setInterval(updateDuskProgress, 500);
-updateDuskProgress();
+/* =========================
+   3. PROGRESS (AGORA EM TEMPO REAL)
+========================= */
+let isDraggingProgress = false;
 
-function updateDuskKnob() {
-  const player = document.querySelector("ytmusic-player-bar");
+function updateProgress() {
+  if (!player || !progressEl || isDraggingProgress) return;
+
+  const value = Number(progressEl.getAttribute("aria-valuenow"));
+  const max = Number(progressEl.getAttribute("aria-valuemax"));
+
+  if (!max || Number.isNaN(value) || Number.isNaN(max)) return;
+
+  const percent = Math.min(Math.max(value / max, 0), 1);
+  player.style.setProperty("--dusk-progress", percent);
+}
+
+function progressLoop() {
+  updateProgress();
+  requestAnimationFrame(progressLoop);
+}
+
+progressLoop();
+
+/* =========================
+   4. PLAY STATE (PAUSA ANIMAÇÃO)
+========================= */
+
+function updatePlayState() {
+  const video = document.querySelector("video");
+  if (!video) return;
+
+  document.body.classList.toggle("dusk-paused", video.paused);
+}
+
+setInterval(updatePlayState, 500);
+
+/* =========================
+   5. SEGUNDA ONDA (WAVE 2)
+========================= */
+
+function ensureWave() {
   if (!player) return;
 
-  let knob = player.querySelector(".dusk-knob");
-  if (!knob) {
-    knob = document.createElement("div");
-    knob.className = "dusk-knob";
-    player.appendChild(knob);
+  if (!player.querySelector(".dusk-wave-2")) {
+    const wave = document.createElement("div");
+    wave.className = "dusk-wave-2";
+    player.appendChild(wave);
   }
-
-  const progress = Number(getComputedStyle(player).getPropertyValue("--dusk-progress")) || 0;
-
-  knob.style.left = `calc(28px + (100% - 56px) * ${progress})`;
 }
 
-setInterval(updateDuskKnob, 500);
+setInterval(ensureWave, 1000);
+
+/* =========================
+   6. COLOR EXTRACTION (OTIMIZADO)
+========================= */
+
+let lastThumb = "";
+
+function getThumbnail() {
+  return document.querySelector(
+    "ytmusic-player-bar img, ytmusic-player-bar yt-img-shadow img"
+  );
+}
+
+function extractColors(img) {
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+
+  canvas.width = 32;
+  canvas.height = 32;
+
+  ctx.drawImage(img, 0, 0, 32, 32);
+
+  const data = ctx.getImageData(0, 0, 32, 32).data;
+
+  let r = 0, g = 0, b = 0, count = 0;
+
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i + 3] < 180) continue;
+
+    r += data[i];
+    g += data[i + 1];
+    b += data[i + 2];
+    count++;
+  }
+
+  if (!count) return;
+
+  r = Math.round(r / count);
+  g = Math.round(g / count);
+  b = Math.round(b / count);
+
+  const hue = rgbToHue(r, g, b);
+
+  document.documentElement.style.setProperty(
+    "--dusk-player-color-1",
+    `hsl(${hue}, 85%, 72%)`
+  );
+
+  document.documentElement.style.setProperty(
+    "--dusk-player-color-2",
+    `hsl(${(hue + 35) % 360}, 85%, 65%)`
+  );
+}
+
+function updateColors() {
+  const thumb = getThumbnail();
+
+  if (!thumb || !thumb.src) return;
+
+  if (thumb.src !== lastThumb) {
+    lastThumb = thumb.src;
+
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = thumb.src;
+
+    img.onload = () => extractColors(img);
+  }
+}
+
+setInterval(updateColors, 1000);
+
+/* =========================
+   7. UTILS
+========================= */
+
+function rgbToHue(r, g, b) {
+  r /= 255;
+  g /= 255;
+  b /= 255;
+
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const d = max - min;
+
+  if (d === 0) return 270;
+
+  let h;
+
+  if (max === r) h = ((g - b) / d) % 6;
+  else if (max === g) h = (b - r) / d + 2;
+  else h = (r - g) / d + 4;
+
+  return Math.round(h * 60 + (h < 0 ? 360 : 0));
+}
+
+/* =========================
+   8. DRAG VISUAL EM TEMPO REAL
+========================= */
+
+function getDragPercent(event) {
+  if (!player) return 0;
+
+  const padding = 28;
+  const rect = player.getBoundingClientRect();
+
+  const start = rect.left + padding;
+  const end = rect.right - padding;
+
+  const percent = (event.clientX - start) / (end - start);
+
+  return Math.min(Math.max(percent, 0), 1);
+}
+
+function setVisualProgress(percent) {
+  if (!player) return;
+  player.style.setProperty("--dusk-progress", percent);
+}
+
+document.addEventListener("pointerdown", (event) => {
+  if (!progressEl || !player) return;
+
+  if (event.target.closest("tp-yt-paper-slider#progress-bar")) {
+    isDraggingProgress = true;
+
+    const percent = getDragPercent(event);
+    if (percent !== null) setVisualProgress(percent);
+  }
+});
+
+document.addEventListener("pointermove", (event) => {
+  if (!isDraggingProgress) return;
+
+  const percent = getDragPercent(event);
+  if (percent !== null) setVisualProgress(percent);
+});
+
+document.addEventListener("pointerup", () => {
+  isDraggingProgress = false;
+});
