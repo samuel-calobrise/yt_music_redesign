@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 #  YouTube Music Redesign Extension v0.2.3
+=======
+#  YouTube Music Redesign Extension v0.2.4
+>>>>>>> fe53679 (versão 0.2.4 - melhorias no player, correção de bugs, codigo refatorado e um fix para a progress bar)
 
 Redesign da interface do YouTube Music como uma extensão de navegador, focada em melhorar a experiência visual e usabilidade do player alem de deixar a interface mais moderna.
 
@@ -32,7 +36,10 @@ A extensão atua diretamente sobre o site do YouTube Music, modificando estilos 
 ### ⚠️ Em ajustes
 
 * Aparência visual da barra de progresso (cores/preenchimento)
+<<<<<<< HEAD
 * Sobreposição da barra original do YouTube Music em alguns casos
+=======
+>>>>>>> fe53679 (versão 0.2.4 - melhorias no player, correção de bugs, codigo refatorado e um fix para a progress bar)
 * menu lateral ainda sem animação
 
 ---
@@ -43,18 +50,9 @@ A extensão atua diretamente sobre o site do YouTube Music, modificando estilos 
 * Pequenos bugs visuais
 * Necessidade de ajustes finos em estilos (posição, cores, camadas)
 * a interface da pagina inicial pode deixar de funcionar ao abrir o menu de musica e fechar
+* icone de volume ao clicar para dar mute e clicar novamente para remover o mute não esta mudando a aparencia mas continua funcional
 
 ---
-
-##  Próximos passos
-
-* Corrigir completamente a sobreposição da interface original
-* Melhorar feedback visual da barra de progresso (preenchimento dinâmico)
-* Refinar design da bolinha de controle (thumb)
-* Ajustes de responsividade
-* Possível expansão para outros elementos da interface
-
-
 
 ##  Como usar
 

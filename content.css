@@ -1,6 +1,6 @@
 /*
   YT Music Dusk — Extension Theme
-  v0.3 CSS refactor
+  v0.2.4 CSS refactor
 */
 
 /* =========================
@@ -25,12 +25,12 @@
   --dusk-player-width: min(920px, calc(100vw - 140px));
   --dusk-player-height: 72px;
   --dusk-player-x-padding: 28px;
-  --dusk-progress-top: 6px;
+  --dusk-progress-top: 1px;
   --dusk-progress-height: 4px;
 }
 
 /* =========================
-   2. BASE / SCROLL
+   2. BASE / FUNDO / SCROLL
 ========================= */
 
 html,
@@ -65,7 +65,10 @@ ytmusic-section-list-renderer {
   background: transparent !important;
 }
 
-/* Reset agressivo necessário para o fundo custom aparecer */
+/*
+  Reset agressivo usado para o fundo custom.
+  Atenção: ele afeta elementos internos. Evite estilizar popups globais por cima disso.
+*/
 html,
 body,
 ytmusic-app,
@@ -79,7 +82,6 @@ ytmusic-app *,
   background-image: none !important;
 }
 
-/* Fundo base */
 body::before {
   content: "";
   position: fixed;
@@ -126,6 +128,33 @@ ytmusic-search-box input {
   background: transparent !important;
   border: none !important;
   color: var(--dusk-text) !important;
+}
+
+/* Search suggestions */
+ytmusic-search-suggestions-section,
+ytmusic-search-suggestions-renderer,
+ytmusic-popup-container tp-yt-paper-dialog {
+  background: rgba(18, 18, 26, 0.75) !important;
+  backdrop-filter: blur(16px) saturate(1.1) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(1.1) !important;
+
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 16px !important;
+
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+}
+
+ytmusic-search-suggestion,
+ytmusic-search-suggestions-section ytmusic-responsive-list-item-renderer {
+  background: transparent !important;
+  transition: background 0.15s ease !important;
+}
+
+ytmusic-search-suggestion:hover,
+ytmusic-search-suggestions-section ytmusic-responsive-list-item-renderer:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
 }
 
 /* =========================
@@ -336,7 +365,6 @@ ytmusic-player-bar {
     inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
 }
 
-/* Espaçamento interno abaixo da progress bar */
 ytmusic-player-bar #left-controls,
 ytmusic-player-bar .content-info-wrapper,
 ytmusic-player-bar #right-controls,
@@ -355,80 +383,71 @@ ytmusic-player-bar yt-img-shadow img {
   border-radius: 12px !important;
 }
 
-/* Progress bar visual — base */
-ytmusic-player-bar::before {
-  content: "";
+/* =========================
+   8. PLAYER — PROGRESS SVG
+========================= */
+
+.dusk-progress-svg {
   position: absolute;
   left: var(--dusk-player-x-padding);
   right: var(--dusk-player-x-padding);
   top: var(--dusk-progress-top);
-  height: var(--dusk-progress-height);
 
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.15);
-  pointer-events: none;
-  z-index: 1;
-}
+  width: calc(100% - (var(--dusk-player-x-padding) * 2));
+  height: 18px;
 
-/* Progress bar visual — preenchimento */
-ytmusic-player-bar::after {
-  content: "";
-  position: absolute;
-  left: var(--dusk-player-x-padding);
-  top: var(--dusk-progress-top);
-
-  width: calc((100% - (var(--dusk-player-x-padding) * 2)) * clamp(0, var(--dusk-progress, 0), 1));
-  height: var(--dusk-progress-height);
-
-  border-radius: 999px;
+  overflow: visible;
   pointer-events: none;
   z-index: 2;
-
-  background: linear-gradient(
-    90deg,
-    var(--dusk-player-color-1),
-    var(--dusk-player-color-2),
-    var(--dusk-player-color-1)
-  ) !important;
-
-  background-size: 320% 100% !important;
-  animation: duskProgressWave 3.2s ease-in-out infinite !important;
-
-  box-shadow:
-    0 0 8px rgba(255, 255, 255, 0.4),
-    0 0 16px rgba(155, 77, 255, 0.3);
-
-  transition: none;
 }
 
-body.dusk-paused ytmusic-player-bar::after {
-  animation-play-state: paused !important;
+.dusk-progress-track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.16);
+  stroke-width: 4;
+  stroke-linecap: round;
 }
 
-/* Segunda onda criada pelo JS */
-ytmusic-player-bar .dusk-wave-2 {
-  position: absolute;
-  left: var(--dusk-player-x-padding);
-  top: var(--dusk-progress-top);
+.dusk-progress-fill {
+  fill: none;
+  stroke: url(#duskProgressGradient);
+  stroke-width: 4.5;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.28));
+}
 
-  height: var(--dusk-progress-height);
-  width: calc((100% - (var(--dusk-player-x-padding) * 2)) * clamp(0, var(--dusk-progress, 0), 1));
-
-  border-radius: 999px;
+.dusk-progress-wave {
+  fill: none;
+  stroke: url(#duskProgressGradient);
+  stroke-linecap: round;
   pointer-events: none;
-  z-index: 2;
-
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.38),
-    transparent
-  );
-
-  filter: blur(3px);
-  opacity: 0.6;
 }
 
-/* Slider real do YT Music: invisível, mas clicável e alinhado */
+.dusk-progress-wave-a {
+  stroke-width: 2.8;
+  opacity: 0.65;
+  filter: blur(0.25px);
+}
+
+.dusk-progress-wave-b {
+  stroke-width: 2;
+  opacity: 0.35;
+  filter: blur(1.2px);
+}
+
+.dusk-progress-knob {
+  fill: var(--dusk-player-color-1);
+  filter:
+    drop-shadow(0 0 6px var(--dusk-player-color-1))
+    drop-shadow(0 0 14px var(--dusk-player-color-2));
+}
+
+body.dusk-paused .dusk-progress-fill,
+body.dusk-paused .dusk-progress-knob {
+  filter: none;
+}
+
+/* Slider real do YT Music: invisível, mas clicável */
 ytmusic-player-bar tp-yt-paper-slider#progress-bar {
   position: absolute !important;
   left: 0 !important;
@@ -441,74 +460,134 @@ ytmusic-player-bar tp-yt-paper-slider#progress-bar {
 
   z-index: 10 !important;
   opacity: 0.01 !important;
-}
 
-ytmusic-player-bar tp-yt-paper-slider#progress-bar #sliderContainer {
   margin: 0 var(--dusk-player-x-padding) !important;
   width: calc(100% - (var(--dusk-player-x-padding) * 2)) !important;
   box-sizing: border-box !important;
 }
 
-ytmusic-player-bar tp-yt-paper-slider#progress-bar .bar-container {
-  width: 100% !important;
+/* =========================
+   9. PLAYER — VOLUME
+========================= */
+
+ytmusic-player-bar tp-yt-paper-slider#volume-slider,
+ytmusic-player-bar tp-yt-paper-slider#volume-slider * {
+  background-color: revert !important;
+  background-image: revert !important;
 }
 
-/* Volume: mantém a lógica original */
 ytmusic-player-bar tp-yt-paper-slider#volume-slider {
   width: 72px !important;
-  opacity: 0.8 !important;
+  min-width: 72px !important;
+  height: 18px !important;
+  margin-top: 8px !important;
 
-  --paper-slider-container-color: rgba(255, 255, 255, 0.20) !important;
-  --paper-slider-active-color: rgba(255, 255, 255, 0.85) !important;
-  --paper-slider-knob-color: #ffffff !important;
+  --paper-slider-container-color: rgba(255, 255, 255, 0.24) !important;
+  --paper-slider-active-color: var(--dusk-player-color-1) !important;
+  --paper-slider-knob-color: var(--dusk-player-color-1) !important;
+}
+
+/* Volume track */
+ytmusic-player-bar tp-yt-paper-slider#volume-slider tp-yt-paper-progress#sliderBar {
+  height: 3px !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  overflow: visible !important;
+}
+
+ytmusic-player-bar tp-yt-paper-slider#volume-slider #progressContainer {
+  height: 3px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.22) !important;
+  overflow: hidden !important;
+}
+
+ytmusic-player-bar tp-yt-paper-slider#volume-slider #primaryProgress {
+  height: 3px !important;
+  border-radius: 999px !important;
+  background: linear-gradient(
+    90deg,
+    var(--dusk-player-color-1),
+    var(--dusk-player-color-2)
+  ) !important;
+  transform-origin: left center !important;
+}
+
+ytmusic-player-bar tp-yt-paper-slider#volume-slider #secondaryProgress {
+  background: transparent !important;
+}
+
+/* Volume knob */
+ytmusic-player-bar tp-yt-paper-slider#volume-slider #sliderKnob {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+ytmusic-player-bar tp-yt-paper-slider#volume-slider #sliderKnobInner,
+ytmusic-player-bar tp-yt-paper-slider#volume-slider .slider-knob-inner {
+  width: 10px !important;
+  height: 10px !important;
+  border: none !important;
+  outline: none !important;
+  border-radius: 999px !important;
+
+  background: radial-gradient(
+    circle,
+    var(--dusk-player-color-1) 25%,
+    transparent 100%
+  ) !important;
+
+  box-shadow:
+    0 0 4px var(--dusk-player-color-1),
+    0 0 10px var(--dusk-player-color-2) !important;
+
+  transition: transform 0.15s ease !important;
+}
+
+ytmusic-player-bar tp-yt-paper-slider#volume-slider:hover .slider-knob-inner,
+ytmusic-player-bar tp-yt-paper-slider#volume-slider:hover #sliderKnobInner {
+  transform: scale(1.15) !important;
 }
 
 /* =========================
-   8. PLAYER MENU
+   10. MENUS / POPUPS
 ========================= */
 
-ytmusic-menu-popup-renderer,
-tp-yt-paper-dialog,
-tp-yt-paper-listbox,
-ytmusic-popup-container {
+/*
+  Não estilizar:
+  - ytmusic-popup-container
+  - tp-yt-iron-dropdown
+  - tp-yt-paper-dialog global
+
+  Esses containers são controlados pelo JS interno do YouTube Music.
+  Mexer neles quebrou click/hitbox no watch page.
+*/
+
+ytmusic-menu-popup-renderer {
   background: rgba(18, 18, 26, 0.96) !important;
-  border: 1px solid rgba(255, 255, 255, 0.14) !important;
-  border-radius: 16px !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.45) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.48) !important;
 }
 
-ytmusic-menu-navigation-item-renderer:hover,
-ytmusic-menu-service-item-renderer:hover,
-ytmusic-toggle-menu-service-item-renderer:hover {
+ytmusic-menu-popup-renderer ytmusic-menu-navigation-item-renderer,
+ytmusic-menu-popup-renderer ytmusic-menu-service-item-renderer,
+ytmusic-menu-popup-renderer ytmusic-toggle-menu-service-item-renderer {
+  background: transparent !important;
+}
+
+ytmusic-menu-popup-renderer ytmusic-menu-navigation-item-renderer:hover,
+ytmusic-menu-popup-renderer ytmusic-menu-service-item-renderer:hover,
+ytmusic-menu-popup-renderer ytmusic-toggle-menu-service-item-renderer:hover {
   background: rgba(255, 255, 255, 0.08) !important;
 }
 
 /* =========================
-   9. REMOÇÕES
+   11. REMOÇÕES
 ========================= */
 
 ytmusic-cast-button,
 yt-icon-button[aria-label*="Cast"],
 yt-icon-button[aria-label*="Transmit"] {
   display: none !important;
-}
-
-/* =========================
-   10. ANIMAÇÕES
-========================= */
-
-@keyframes duskProgressWave {
-  0% {
-    background-position: 0% 50%;
-  }
-
-  50% {
-    background-position: 100% 50%;
-  }
-
-  100% {
-    background-position: 0% 50%;
-  }
 }

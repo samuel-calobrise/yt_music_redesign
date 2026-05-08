@@ -98,6 +98,7 @@ function updateProgress() {
 
 function progressLoop() {
   updateProgress();
+  updateSvgProgress();
   requestAnimationFrame(progressLoop);
 }
 
@@ -108,29 +109,98 @@ progressLoop();
 ========================= */
 
 function updatePlayState() {
-  const video = document.querySelector("video");
-  if (!video) return;
+  const media = document.querySelector("video, audio");
+  if (!media) return;
 
-  document.body.classList.toggle("dusk-paused", video.paused);
+  document.body.classList.toggle("dusk-paused", media.paused);
 }
 
 setInterval(updatePlayState, 500);
 
 /* =========================
-   5. SEGUNDA ONDA (WAVE 2)
+   SVG ORGANIC PROGRESS
 ========================= */
 
-function ensureWave() {
-  if (!player) return;
+function ensureSvgProgress() {
+  if (!player) return null;
 
-  if (!player.querySelector(".dusk-wave-2")) {
-    const wave = document.createElement("div");
-    wave.className = "dusk-wave-2";
-    player.appendChild(wave);
+  let svg = player.querySelector(".dusk-progress-svg");
+
+  if (!svg) {
+    svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.classList.add("dusk-progress-svg");
+    svg.setAttribute("viewBox", "0 0 1000 18");
+    svg.setAttribute("preserveAspectRatio", "none");
+
+    svg.innerHTML = `
+      <defs>
+        <linearGradient id="duskProgressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="var(--dusk-player-color-1)" />
+          <stop offset="100%" stop-color="var(--dusk-player-color-2)" />
+        </linearGradient>
+      </defs>
+
+      <path class="dusk-progress-track" />
+      <path class="dusk-progress-fill" />
+      <path class="dusk-progress-wave dusk-progress-wave-a" />
+      <path class="dusk-progress-wave dusk-progress-wave-b" />
+      <circle class="dusk-progress-knob" r="6" />
+    `;
+
+    player.appendChild(svg);
   }
+
+  return svg;
 }
 
-setInterval(ensureWave, 1000);
+function buildWavePath(percent, phase = 0, amp = 0.8) {
+  const total = 1000;
+  const y = 9;
+  const end = Math.max(total * percent, 1);
+
+  const playing = !document.body.classList.contains("dusk-paused");
+  const t = playing ? performance.now() / 520 + phase : phase;
+
+  return `
+    M 0 ${y}
+    C ${end * 0.18} ${y + Math.sin(t) * amp},
+      ${end * 0.34} ${y - Math.cos(t * 0.9) * amp},
+      ${end * 0.50} ${y + Math.sin(t * 1.1) * amp}
+    C ${end * 0.66} ${y - Math.sin(t * 0.8) * amp},
+      ${end * 0.84} ${y + Math.cos(t) * amp},
+      ${end} ${y}
+  `;
+}
+function updateSvgProgress() {
+  if (!player) return;
+
+  const svg = ensureSvgProgress();
+  if (!svg) return;
+
+  const progress = Number(
+    getComputedStyle(player).getPropertyValue("--dusk-progress")
+  ) || 0;
+
+  const percent = Math.min(Math.max(progress, 0), 1);
+  const end = 1000 * percent;
+
+  const track = svg.querySelector(".dusk-progress-track");
+  const fill = svg.querySelector(".dusk-progress-fill");
+  const waveA = svg.querySelector(".dusk-progress-wave-a");
+  const waveB = svg.querySelector(".dusk-progress-wave-b");
+  const knob = svg.querySelector(".dusk-progress-knob");
+
+  if (!track || !fill || !waveA || !waveB || !knob) return;
+
+  track.setAttribute("d", "M 0 9 L 1000 9");
+  fill.setAttribute("d", `M 0 9 L ${end} 9`);
+
+  waveA.setAttribute("d", buildWavePath(percent, 0, 1.1));
+  waveB.setAttribute("d", buildWavePath(percent, 1.8, 0.7));
+
+  knob.setAttribute("cx", String(end));
+  knob.setAttribute("cy", "9");
+}
 
 /* =========================
    6. COLOR EXTRACTION (OTIMIZADO)
@@ -269,5 +339,9 @@ document.addEventListener("pointermove", (event) => {
 });
 
 document.addEventListener("pointerup", () => {
+  isDraggingProgress = false;
+});
+
+document.addEventListener("pointercancel", () => {
   isDraggingProgress = false;
 });
