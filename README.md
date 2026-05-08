@@ -1,6 +1,5 @@
 =======
 #  YouTube Music Redesign Extension v0.2.4
->>>>>>> fe53679 (versão 0.2.4 - melhorias no player, correção de bugs, codigo refatorado e um fix para a progress bar)
 
 Redesign da interface do YouTube Music como uma extensão de navegador, focada em melhorar a experiência visual e usabilidade do player alem de deixar a interface mais moderna.
 
