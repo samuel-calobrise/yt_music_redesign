@@ -345,3 +345,56 @@ document.addEventListener("pointerup", () => {
 document.addEventListener("pointercancel", () => {
   isDraggingProgress = false;
 });
+
+const RPC_ENDPOINT = "http://localhost:3030/presence";
+
+let lastPresencePayload = "";
+
+function getTrackInfo() {
+  const titleEl = document.querySelector(".title.ytmusic-player-bar");
+  const bylineEl = document.querySelector(".byline.ytmusic-player-bar");
+  const media = document.querySelector("video, audio");
+
+  const title = titleEl?.textContent?.trim();
+  const artist = bylineEl?.textContent?.trim();
+
+  return {
+    title: title || "YouTube Music",
+    artist: artist || "Ouvindo música",
+    isPlaying: media ? !media.paused : true,
+  };
+}
+
+async function updateDiscordPresence() {
+  const data = getTrackInfo();
+  const payload = JSON.stringify(data);
+
+  if (payload === lastPresencePayload) return;
+  lastPresencePayload = payload;
+
+  try {
+    await fetch(RPC_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: payload,
+    });
+  } catch {
+    // servidor desligado → ignora silenciosamente
+  }
+}
+
+// espera o player existir antes de começar
+function waitForPlayer() {
+  const player = document.querySelector("ytmusic-player-bar");
+
+  if (!player) {
+    requestAnimationFrame(waitForPlayer);
+    return;
+  }
+
+  setInterval(updateDiscordPresence, 3000);
+}
+
+waitForPlayer();
