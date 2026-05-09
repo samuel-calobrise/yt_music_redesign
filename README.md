@@ -1,5 +1,5 @@
 =======
-#  YouTube Music Redesign Extension v0.2.4
+#  YouTube Music Redesign Extension v0.3
 
 Redesign da interface do YouTube Music como uma extensão de navegador, focada em melhorar a experiência visual e usabilidade do player alem de deixar a interface mais moderna.
 
@@ -27,6 +27,7 @@ A extensão atua diretamente sobre o site do YouTube Music, modificando estilos 
 * player customizado
 * pagina inicial
 * menu lateral
+* rich presence com discord(ainda com imagem placeholdere precisando de ajustes)
 
 ### ⚠️ Em ajustes
 
