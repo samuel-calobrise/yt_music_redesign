@@ -313,6 +313,85 @@ ytmusic-guide-section-renderer:not([is-collapsed]) ytmusic-guide-entry-renderer 
     transform 220ms ease 80ms !important;
 }
 
+/* SIDEBAR — corrige mini scrollbars nos subtítulos */
+ytmusic-guide-entry-renderer .subtitle-group,
+ytmusic-guide-entry-renderer .title-column,
+ytmusic-guide-entry-renderer .title-group,
+ytmusic-guide-entry-renderer yt-formatted-string {
+  overflow: hidden !important;
+  overflow-y: hidden !important;
+  max-height: none !important;
+}
+
+ytmusic-guide-entry-renderer .subtitle,
+ytmusic-guide-entry-renderer #subtitle {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* SIDEBAR — base arredondada */
+ytmusic-guide-renderer {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  margin: 8px !important;
+}
+
+/* separação visual */
+ytmusic-guide-renderer {
+  background: rgba(20, 20, 30, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+ytmusic-guide-renderer {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  margin: 8px !important;
+
+  background: rgba(20, 20, 30, 0.55) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+ytmusic-guide-entry-renderer:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-radius: 10px !important;
+}
+
+/* SIDEBAR — integrada com o gradiente */
+ytmusic-guide-renderer {
+  border-radius: 16px !important;
+  margin: 8px !important;
+  overflow: hidden !important;
+
+  background: linear-gradient(
+    to bottom,
+    rgba(20, 20, 30, 0.7),
+    rgba(20, 20, 30, 0.4)
+  ) !important;
+
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+ytmusic-guide-renderer {
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--player-color) 20%, rgba(20,20,30,0.8)),
+    rgba(20,20,30,0.5)
+  ) !important;
+}
+
+ytmusic-guide-entry-renderer:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-radius: 10px !important;
+  transition: 0.2s ease !important;
+}
+
 /* =========================
    6. SEÇÕES / CARDS
 ========================= */
@@ -599,3 +678,4 @@ ytmusic-section-list-renderer {
   overflow-x: hidden !important;
   padding-bottom: 96px !important;
 }
+
