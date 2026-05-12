@@ -1,5 +1,5 @@
 =======
-#  YouTube Music Redesign Extension v0.3.1
+#  YouTube Music Redesign Extension v0.3.2
 
 Redesign da interface do YouTube Music como uma extensão de navegador, focada em melhorar a experiência visual e usabilidade do player alem de deixar a interface mais moderna.
 
