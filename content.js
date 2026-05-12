@@ -359,10 +359,12 @@ function getTrackInfo() {
   const artist = bylineEl?.textContent?.trim();
 
   return {
-    title: title || "YouTube Music",
-    artist: artist || "Ouvindo música",
-    isPlaying: media ? !media.paused : true,
-  };
+  title: title || "YouTube Music",
+  artist: artist || "Ouvindo música",
+  isPlaying: media ? !media.paused : true,
+  currentTime: media?.currentTime || 0,
+  duration: media?.duration || 0,
+};
 }
 
 async function updateDiscordPresence() {

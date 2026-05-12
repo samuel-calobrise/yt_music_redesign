@@ -29,11 +29,21 @@ function buildActivity(data) {
   const title = data.title || "YouTube Music";
   const artist = data.artist || "Ouvindo música";
 
-  return {
+  const activity = {
+    type: 2,
     details: title,
     state: artist,
     instance: false,
   };
+
+  if (data.isPlaying && data.duration > 0) {
+    const now = Date.now();
+
+    activity.startTimestamp = now - data.currentTime * 1000;
+    activity.endTimestamp = now + (data.duration - data.currentTime) * 1000;
+  }
+
+  return activity;
 }
 
 app.post("/presence", async (req, res) => {

@@ -52,11 +52,11 @@ ytmusic-app,
 #content,
 #page-manager,
 #browse-page {
-  height: calc(100vh - 72px) !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  padding-bottom: 96px !important;
+  height: auto !important;
+  min-height: auto !important;
+  padding-bottom: 0 !important;
   background: transparent !important;
+  overflow: visible !important;
 }
 
 #contents,
@@ -590,4 +590,12 @@ ytmusic-cast-button,
 yt-icon-button[aria-label*="Cast"],
 yt-icon-button[aria-label*="Transmit"] {
   display: none !important;
+}
+
+ytmusic-browse-response,
+ytmusic-section-list-renderer {
+  max-height: calc(100vh - 72px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding-bottom: 96px !important;
 }
