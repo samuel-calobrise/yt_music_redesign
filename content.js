@@ -400,3 +400,199 @@ function waitForPlayer() {
 }
 
 waitForPlayer();
+
+function ensureDuskLyricsPanel() {
+  function ensureDuskLyricsPanel() {
+  if (!isLyricsTabActive()) {
+    document.querySelectorAll("#dusk-lyrics-panel").forEach(panel => panel.remove());
+    return;
+  }
+
+  const lyricsText = document.querySelector(
+    "ytmusic-player-page ytmusic-tab-renderer[is-selected] ytmusic-description-shelf-renderer yt-formatted-string.description"
+  );
+
+  if (!lyricsText) return;
+
+  const host = lyricsText.closest("ytmusic-description-shelf-renderer");
+  if (!host) return;
+
+  if (host.querySelector("#dusk-lyrics-panel")) return;
+
+  const panel = document.createElement("div");
+  panel.id = "dusk-lyrics-panel";
+  panel.innerHTML = `<div>Carregando letras...</div>`;
+
+  host.prepend(panel);
+}
+
+  const lyricsText = document.querySelector(
+    "ytmusic-description-shelf-renderer yt-formatted-string.description"
+  );
+
+  if (!lyricsText) return;
+
+  const host = lyricsText.closest("ytmusic-description-shelf-renderer");
+  if (!host) return;
+
+  if (host.querySelector("#dusk-lyrics-panel")) return;
+
+  const panel = document.createElement("div");
+  panel.id = "dusk-lyrics-panel";
+  panel.innerHTML = `
+  <div id="dusk-lyrics-lines">
+    <div>Carregando letras...</div>
+  </div>
+`;
+
+  host.prepend(panel);
+}
+
+setInterval(ensureDuskLyricsPanel, 1000);
+
+let currentLyricsKey = "";
+let parsedLyrics = [];
+
+async function loadLyricsIntoPanel() {
+  const panel = document.querySelector("#dusk-lyrics-panel");
+  const media = document.querySelector("video, audio");
+
+  if (!panel || !media) return;
+
+  const track = getTrackInfo();
+  const parts = track.artist.split("•").map(p => p.trim());
+
+  const cleanTrack = {
+    title: track.title,
+    artist: parts[0] || track.artist,
+    album: parts[1] || "",
+    duration: media.duration || 0,
+  };
+
+  const key = `${cleanTrack.title}::${cleanTrack.artist}::${Math.round(cleanTrack.duration)}`;
+
+  if (key === currentLyricsKey) return;
+  currentLyricsKey = key;
+
+  panel.innerHTML = `<div>Buscando letras sincronizadas...</div>`;
+
+  try {
+    console.log("Buscando LRCLIB:", cleanTrack);
+
+    const synced = await fetchSyncedLyrics(cleanTrack);
+
+    console.log("LRCLIB resultado:", synced);
+
+    if (!synced) {
+      panel.innerHTML = `<div>Sem letras sincronizadas para esta música.</div>`;
+      return;
+    }
+
+    parsedLyrics = parseLrc(synced);
+
+    console.log("Parsed lyrics:", parsedLyrics);
+
+    if (!parsedLyrics.length) {
+      panel.innerHTML = `<div>Letra encontrada, mas sem timestamps válidos.</div>`;
+      return;
+    }
+
+    panel.innerHTML = parsedLyrics
+  .map((line, index) => `
+    <div class="dusk-lyric-line" data-index="${index}">
+      ${line.text}
+    </div>
+  `)
+  .join("");
+  } catch (err) {
+    console.error("Erro no Dusk Lyrics:", err);
+    panel.innerHTML = `<div>Erro ao carregar letras sincronizadas.</div>`;
+  }
+}
+
+setInterval(loadLyricsIntoPanel, 3000);
+
+async function fetchSyncedLyrics({ title, artist, album, duration }) {
+  const params = new URLSearchParams({
+    track_name: title,
+    artist_name: artist,
+  });
+
+  if (album) params.set("album_name", album);
+  if (duration) params.set("duration", String(Math.round(duration)));
+
+  const response = await fetch(`https://lrclib.net/api/get?${params}`);
+
+  if (!response.ok) return null;
+
+  const data = await response.json();
+
+  return data.syncedLyrics || null;
+}
+
+function parseLrc(lrc) {
+  return lrc
+    .split("\n")
+    .flatMap((line) => {
+      const matches = [...line.matchAll(/\[(\d{1,2}):(\d{2})(?:\.(\d{1,3}))?\]/g)];
+      const text = line.replace(/\[(\d{1,2}):(\d{2})(?:\.(\d{1,3}))?\]/g, "").trim();
+
+      if (!matches.length) return [];
+
+      return matches.map((match) => {
+        const minutes = Number(match[1]);
+        const seconds = Number(match[2]);
+        const milliseconds = Number((match[3] || "0").padEnd(3, "0"));
+
+        return {
+          time: minutes * 60 + seconds + milliseconds / 1000,
+          text,
+        };
+      });
+    })
+    .filter((line) => line.text);
+}
+
+let activeLyricIndex = -1;
+
+function getActiveLyricIndex(currentTime) {
+  if (!parsedLyrics.length) return -1;
+
+  for (let i = parsedLyrics.length - 1; i >= 0; i--) {
+    if (currentTime >= parsedLyrics[i].time) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+function updateLyricsActiveLine() {
+  const media = document.querySelector("video, audio");
+  const panel = document.querySelector("#dusk-lyrics-panel");
+
+  if (!media || !panel || !parsedLyrics.length) return;
+
+  const index = getActiveLyricIndex(media.currentTime);
+  if (index === activeLyricIndex) return;
+
+  activeLyricIndex = index;
+
+  const lines = panel.querySelectorAll(".dusk-lyric-line");
+
+  lines.forEach((line, i) => {
+    line.classList.toggle("is-active", i === index);
+    line.classList.toggle("is-past", i < index);
+  });
+
+  const active = panel.querySelector(`.dusk-lyric-line[data-index="${index}"]`);
+
+  if (active) {
+  active.scrollIntoView({
+    behavior: "smooth",
+    block: "center",
+  });
+  }
+}
+
+setInterval(updateLyricsActiveLine, 180);

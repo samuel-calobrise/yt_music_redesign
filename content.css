@@ -679,3 +679,67 @@ ytmusic-section-list-renderer {
   padding-bottom: 96px !important;
 }
 
+/* WATCH PAGE — lyrics keep internal scroll only */
+ytmusic-tab-renderer[page-type="MUSIC_PAGE_TYPE_TRACK_LYRICS"] {
+  overflow: hidden !important;
+}
+
+ytmusic-tab-renderer[page-type="MUSIC_PAGE_TYPE_TRACK_LYRICS"] #content {
+  overflow: hidden !important;
+}
+
+/* deixa a própria letra rolar */
+ytmusic-tab-renderer[page-type="MUSIC_PAGE_TYPE_TRACK_LYRICS"] ytmusic-description-shelf-renderer {
+  max-height: calc(100vh - 260px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding-right: 12px !important;
+}
+
+#dusk-lyrics-panel {
+  padding: 24px;
+  margin-bottom: 20px;
+  border-radius: 24px;
+  background: rgba(18, 18, 26, 0.75);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: white;
+  font-weight: 700;
+}
+
+.dusk-lyric-line {
+  font-size: 20px;
+  opacity: 0.4;
+  margin-bottom: 10px;
+}
+
+#dusk-lyrics-panel {
+  overflow-y: auto !important;
+  scroll-behavior: smooth;
+}
+
+.dusk-lyric-line {
+  opacity: 0.34;
+  transform: scale(0.96);
+  transition:
+    opacity 260ms ease,
+    color 260ms ease,
+    transform 260ms ease,
+    filter 260ms ease;
+}
+
+.dusk-lyric-line.is-active {
+  opacity: 1;
+  color: #fff;
+  transform: scale(1.04);
+  filter:
+    drop-shadow(0 0 8px var(--dusk-player-color-1))
+    drop-shadow(0 0 18px var(--dusk-player-color-2));
+}
+
+.dusk-lyric-line.is-past {
+  opacity: 0.18;
+}
+
+ytmusic-description-shelf-renderer yt-formatted-string.description {
+  display: none !important;
+}
